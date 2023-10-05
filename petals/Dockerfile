@@ -26,7 +26,7 @@ ENV PETALS_CACHE=/cache
 
 COPY . petals/
 RUN pip install --no-cache-dir -e petals
-COPY chat.petals.dev/* chat.petals.dev
+COPY chat.petals.dev /home/petals/
 WORKDIR /home/petals/chat.petals.dev
 RUN pip install -r requirements.txt
 
