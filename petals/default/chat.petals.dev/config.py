@@ -21,23 +21,7 @@ MODEL_FAMILIES = {
                 license="https://huggingface.co/stabilityai/StableBeluga2/blob/main/LICENSE.txt",
             ),
             default_chat_config,
-        ),
-    "Falcon": [
-        ModelConfig(
-            ModelBackendConfig(repository="tiiuae/falcon-180B-chat", public_api=False),
-            ModelFrontendConfig(
-                name="Falcon 180B-Chat",
-                model_card="https://huggingface.co/tiiuae/falcon-180B-chat",
-                license="https://huggingface.co/spaces/tiiuae/falcon-180b-license/blob/main/LICENSE.txt",
-            ),
-            ModelChatConfig(
-                max_session_length=8192,
-                sep_token="\n",
-                stop_token="\n",
-                extra_stop_sequences=["<|endoftext|>", "\nFalcon:", " Falcon:", "\nUser:", " User:", "###"],
-                generation_params=dict(do_sample=1, temperature=0.75, top_p=0.9, repetition_penalty=1.2),
-            ),
-        ),
+        )
     ],
     "Llama": [
         ModelConfig(
@@ -59,27 +43,10 @@ MODEL_FAMILIES = {
             default_chat_config,
         ),
     ],
-    "BLOOM": [
-        ModelConfig(
-            ModelBackendConfig(repository="bigscience/bloomz"),
-            ModelFrontendConfig(
-                name="BLOOMZ-176B",
-                model_card="https://huggingface.co/bigscience/bloomz",
-                license="https://bit.ly/bloom-license",
-            ),
-            ModelChatConfig(
-                max_session_length=2048,
-                sep_token="\n\n",
-                stop_token="</s>",
-                extra_stop_sequences=["\n\nHuman"],
-                generation_params=default_chat_config.generation_params,
-            ),
-        ),
-    ],
+
+
 }
 
-INITIAL_PEERS = PUBLIC_INITIAL_PEERS
-# Set this to a list of multiaddrs to connect to a private swarm instead of the public one, for example:
 INITIAL_PEERS = ['/ip4/43.156.2.8/tcp/31337/p2p/QmVnXVeYbjsvEudzLGvhxL11p4HiEN7XXb4gXzAnCiDhYq']
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
