@@ -26,7 +26,7 @@ VOLUME /root/.cache
 COPY . petals/
 RUN pip install --no-cache-dir -e petals
 COPY default/chat.petals.dev /home/petals/
-WORKDIR /home/petals/chat.petals.dev
+WORKDIR /home/petals/default/chat.petals.dev
 RUN pip install -r requirements.txt
 
 CMD ["flask", "run","--host","0.0.0.0","--port","8181"]

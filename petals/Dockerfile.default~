@@ -29,4 +29,4 @@ COPY default/chat.petals.dev /home/petals/
 WORKDIR /home/petals/chat.petals.dev
 RUN pip install -r requirements.txt
 
-CMD ["flask", "run","--host","0.0.0.0","--port","8080"]
+CMD ["flask", "run","--host","0.0.0.0","--port","8181"]
