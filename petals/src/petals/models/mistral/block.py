@@ -1,6 +1,6 @@
 """
-LLaMA intermediate layer
-Based on https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
+Mistral intermediate layer
+Based on https://github.com/huggingface/transformers/blob/main/src/transformers/models/mistral/modeling_Mistral.py
 See commit history for authorship.
 """
 import math
@@ -9,13 +9,13 @@ from typing import Optional, Tuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers.models.llama.modeling_llama import (
-    LlamaAttention,
-    LlamaConfig,
-    LlamaDecoderLayer,
-    LlamaMLP,
-    LlamaModel,
-    LlamaRMSNorm,
+from transformers.models.mistral.modeling_mistral import (
+    MistralAttention,
+    MistralConfig,
+    MistralDecoderLayer,
+    MistralMLP,
+    MistralModel,
+    MistralRMSNorm,
     repeat_kv,
     rotate_half,
 )
@@ -29,7 +29,7 @@ def apply_rotary_pos_emb(q, k, cos, sin):
     return q_embed, k_embed
 
 
-class OptimizedLlamaAttention(LlamaAttention):
+class OptimizedMistralAttention(MistralAttention):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._rotary_graph = None
@@ -125,17 +125,17 @@ class OptimizedLlamaAttention(LlamaAttention):
         return attn_output, None, past_key_value
 
 
-class OptimizedLlamaDecoderLayer(LlamaDecoderLayer):
-    def __init__(self, config: LlamaConfig):
+class OptimizedMistralDecoderLayer(MistralDecoderLayer):
+    def __init__(self, config: MistralConfig):
         nn.Module.__init__(self)
         self.hidden_size = config.hidden_size
-        self.self_attn = OptimizedLlamaAttention(config=config)
-        self.mlp = LlamaMLP(config)
-        self.input_layernorm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
-        self.post_attention_layernorm = LlamaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
-
+        self.self_attn = OptimizedMistralAttention(config=config)
+        self.mlp = MistralMLP(config)
+        self.input_layernorm = MistralRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
+        self.post_attention_layernorm = MistralRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
         self.pre_attn_graph = None
         self.post_attn_graph = None
+        self.config = config
 
     def _optimized_input_layernorm(self, hidden_states):
         if self.pre_attn_graph is None:
@@ -215,7 +215,7 @@ class OptimizedLlamaDecoderLayer(LlamaDecoderLayer):
         return outputs
 
 
-class WrappedLlamaBlock(OptimizedLlamaDecoderLayer):
+class WrappedMistralBlock(OptimizedMistralDecoderLayer):
     def forward(
         self,
         hidden_states: torch.Tensor,
@@ -235,7 +235,7 @@ class WrappedLlamaBlock(OptimizedLlamaDecoderLayer):
         if past_key_value is not None:
             past_key_values_length = past_key_value[0].shape[2]
             seq_length_with_past = seq_length_with_past + past_key_values_length
-            past_key_value = self._reorder_cache_from_bloom_to_llama(past_key_value, batch_size, past_key_values_length)
+            past_key_value = self._reorder_cache_from_bloom_to_mistral(past_key_value, batch_size, past_key_values_length)
 
         assert position_ids is None
 
@@ -244,8 +244,8 @@ class WrappedLlamaBlock(OptimizedLlamaDecoderLayer):
             attention_mask = torch.ones(
                 (batch_size, seq_length_with_past), dtype=torch.bool, device=hidden_states.device
             )
-        attention_mask = LlamaModel._prepare_decoder_attention_mask(
-            None, attention_mask, (batch_size, seq_length), hidden_states, past_key_values_length
+        attention_mask = MistralModel._prepare_decoder_attention_mask(
+            None, attention_mask, (batch_size, seq_length), hidden_states, past_key_values_length,sliding_window=self.config.sliding_window,
         )
 
         outputs = super().forward(
@@ -260,14 +260,14 @@ class WrappedLlamaBlock(OptimizedLlamaDecoderLayer):
 
         if use_cache:
             present_key_value = outputs[-1]
-            present_key_value = self._reorder_cache_from_llama_to_bloom(
+            present_key_value = self._reorder_cache_from_mistral_to_bloom(
                 present_key_value, batch_size, seq_length_with_past
             )
             outputs = outputs[:-1] + (present_key_value,)
 
         return outputs
 
-    def _reorder_cache_from_bloom_to_llama(
+    def _reorder_cache_from_bloom_to_mistral(
         self, key_value: Tuple[torch.Tensor], batch_size: int, seq_length: int
     ) -> Tuple[torch.Tensor]:
         key_states, value_states = key_value
@@ -278,7 +278,7 @@ class WrappedLlamaBlock(OptimizedLlamaDecoderLayer):
         value_states = value_states.view(*key_states.shape)
         return (key_states, value_states)
 
-    def _reorder_cache_from_llama_to_bloom(
+    def _reorder_cache_from_mistral_to_bloom(
         self, key_value: Tuple[torch.Tensor], batch_size: int, seq_length: int
     ) -> Tuple[torch.Tensor]:
         key_states, value_states = key_value
