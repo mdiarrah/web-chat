@@ -21,24 +21,15 @@ MODEL_FAMILIES = {
                 license="https://bit.ly/llama-license",
             ),
             default_chat_config,
-        ),
-        ModelConfig(
-            ModelBackendConfig(repository="huggyllama/llama-65b", adapter="timdettmers/guanaco-65b"),
-            ModelFrontendConfig(
-                name="Guanaco-65B",
-                model_card="https://huggingface.co/timdettmers/guanaco-65b",
-                license="https://huggingface.co/timdettmers/guanaco-65b",
-            ),
-            default_chat_config,
-        ),    
+        ),  
     ],
-    "Llama 2": [
+    "Mistral": [
         ModelConfig(
-            ModelBackendConfig(repository="petals-team/StableBeluga2", aliases=["stabilityai/StableBeluga2"]),
+            ModelBackendConfig(repository="mistralai/Mistral-7B-v0.1"),
             ModelFrontendConfig(
-                name="Stable Beluga 2 (70B)",
-                model_card="https://huggingface.co/stabilityai/StableBeluga2",
-                license="https://huggingface.co/stabilityai/StableBeluga2/blob/main/LICENSE.txt",
+                name="Mistral-7B",
+                model_card="https://huggingface.co/mistralai/Mistral-7B-v0.1",
+                license="https://huggingface.co/mistralai/Mistral-7B-v0.1/tree/main",
             ),
             default_chat_config,
         )
