@@ -12,17 +12,6 @@ default_chat_config = ModelChatConfig(
 )
 
 MODEL_FAMILIES = {
-    "Llama": [
-         ModelConfig(
-            ModelBackendConfig(repository="huggyllama/llama-65b"),
-            ModelFrontendConfig(
-                name="Llama-65B",
-                model_card="https://github.com/facebookresearch/llama/blob/llama_v1/MODEL_CARD.md",
-                license="https://bit.ly/llama-license",
-            ),
-            default_chat_config,
-        ),  
-    ],
     "Mistral": [
         ModelConfig(
             ModelBackendConfig(repository="mistralai/Mistral-7B-v0.1"),
